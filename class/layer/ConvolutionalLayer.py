@@ -7,11 +7,14 @@ mymodule_dir = os.path.join(script_dir, '..', 'stage')
 sys.path.append(mymodule_dir)
 
 from ConvolutionalStage import ConvolutionalStage
+from DetectorStage import DetectorStage
 
 class ConvolutionalLayer():
   def __init__(self, filterSize, numFilter,  numDepth, padding = 0, stride = 1):
-    self.convolution_stage = ConvolutionalStage(filterSize, numFilter, numDepth, padding, stride)
+    self.convolutionStage = ConvolutionalStage(filterSize, numFilter, numDepth, padding, stride)
+    self.detectorStage = DetectorStage()
 
   def forward(self, inputData):
-    feature_map = self.convolution_stage.forward(inputData)
-    return feature_map
+    featureMap = self.convolutionStage.forward(inputData)
+    outputDetector = self.detectorStage.forward(featureMap)
+    return outputDetector
