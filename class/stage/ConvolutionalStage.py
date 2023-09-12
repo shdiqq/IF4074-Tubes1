@@ -1,43 +1,60 @@
 import numpy as np
+import os
+import sys
+
+script_dir = os.path.dirname(__file__)
+mymodule_dir = os.path.join(script_dir, '..', '..', 'function')
+sys.path.append(mymodule_dir)
+
+from spatialSize import spatialSize
 
 class ConvolutionalStage():
-  def __init__(self, filterSize, numFilter, numDepth, padding = 0, stride = 1):
+  def __init__(self, inputSize, filterSize, numFilter, padding = 0, stride = 1):
+    self.inputSize = inputSize
     self.filterSize = filterSize
     self.numFilter = numFilter
-    self.numDepth = numDepth
     self.padding = padding
     self.stride = stride
     self.bias = np.zeros((numFilter))
-    self.kernel = np.random.randn(self.numFilter, self.filterSize[0], self.filterSize[1], self.numDepth)
+    self.kernel = np.random.randn(self.numFilter, self.filterSize, self.filterSize, self.inputSize[2])
 
-  # def addZeroPadding(self, inputData):
-  #   inputDataUpdate = np.pad(inputData, ((self.padding, self.padding), (self.padding, self.padding), (0, 0)), 'constant', constant_values=0)
-  #   return inputDataUpdate
-
-  def getOutputSize(self, inputHeight, inputWidth):
-    outputHeight = ( inputHeight - self.filterSize[0] + 2 * self.padding ) // self.stride + 1
-    outputWidth = ( inputWidth - self.filterSize[1] + 2 * self.padding ) // self.stride + 1
-    return outputHeight, outputWidth
-        
   def forward(self, inputData):
-    print("Proses forward pada Convolutional Stage")
-    # print("Awal")
-    # print(inputData.shape)
-    # print("===========")
-
-    # inputDataUpdate = self.addZeroPadding(inputData)
-    # print("Setelah padding")
-    # print(inputDataUpdate.shape)
-    # print("===========")
-
-    inputHeight, inputWidth, inputDepth = inputData.shape
-    outputHeight, outputWidth = self.getOutputSize(inputHeight, inputWidth)
+    outputHeight, outputWidth = spatialSize(self.inputSize[0], self.inputSize[1], self.filterSize, self.padding, self.stride)
     featureMap = np.zeros((outputHeight, outputWidth, self.numFilter))
 
     for i in range(self.numFilter) :
-      for row in range(0, inputHeight - self.filterSize[0] + 1, self.stride) :
-        for col in range(0, inputWidth - self.filterSize[1] + 1, self.stride) :
-          inputPatch = inputData[row : row + self.filterSize[0], col : col + self.filterSize[1], :]
+      for row in range(0, self.inputSize[0] - self.filterSize + 1, self.stride) :
+        for col in range(0, self.inputSize[1] - self.filterSize + 1, self.stride) :
+          inputPatch = inputData[row : row + self.filterSize, col : col + self.filterSize, :]
           featureMap[row // self.stride, col // self.stride, i] = np.sum(inputPatch * self.kernel[i]) + self.bias[i]
 
     return featureMap
+  
+### TESTING ###
+if __name__ == "__main__":
+  matrix = np.array(
+    [
+      [
+        [
+          [1,11,2],
+          [1,10,4],
+          [6,12,8],
+        ],
+        [
+          [7,1,2],
+          [5,-1,2],
+          [7,-4,2],
+        ],
+        [
+          [-2,23,2],
+          [2,20,4],
+          [8,6,6],
+        ]
+      ]
+    ]
+  )
+  print(matrix[0].shape) #Expect output (3,3,3)
+  print("=====")
+  convolutionalStage = ConvolutionalStage(inputSize = matrix[0].shape, filterSize = 2, numFilter = 3, padding = 1, stride = 1)
+  newMatrix = convolutionalStage.forward(matrix[0])
+  print(newMatrix.shape) #Expect output (4,4,3)
