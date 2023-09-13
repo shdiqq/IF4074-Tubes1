@@ -12,29 +12,22 @@ from layer.FlattenLayer import FlattenLayer
 from layer.DenseLayer import DenseLayer
 
 class CNN():
-  def __init__(self, input):
-    self.input = input
-    self.output = None
-    self.inputSize = 0
-    self.outputSize = 0
+  def __init__(self):
+    self.layers = []
 
-  def addConvolutionalLayer(self, filterSize, numFilter, mode, padding = 0, stride = 1):
-    convolutionalLayer = ConvolutionalLayer(self.input.shape, filterSize, numFilter, mode, padding, stride)
-    self.output = convolutionalLayer.forward(self.input)
-    self.inputSize = (self.output).shape
-    self.outputSize = (self.output).shape
+  def addLayer(self, layer):
+    self.layers.append(layer)
 
-  def addFlattenLayer(self):
-    flattenLayer = FlattenLayer()
-    self.output = flattenLayer.forward(self.output)
-    self.inputSize = (self.output).shape
-    self.outputSize = (self.output).shape
-
-  def addDenseLayer(self, outputSize, activation):
-    denseLayer = DenseLayer(self.inputSize[0], outputSize, activation)
-    self.output = denseLayer.forward(self.output)
-    self.inputSize = (self.output).shape
-    self.outputSize = (self.output).shape
+  def forward(self, dataInput):
+    output = dataInput
+    for i in range(len(self.layers)) :
+      output = self.layers[i].forward(output)
+    return(output)
+  
+  def predict(self, features):
+    out = np.array([])
+    for i in range(len(features)):
+      result = self.forward(features[i])
 
 ### TESTING ###
 if __name__ == "__main__":
@@ -59,15 +52,24 @@ if __name__ == "__main__":
       ]
     ]
   )
-
-  cnn = CNN(matrix[0])
-  cnn.addConvolutionalLayer(filterSize = 2, numFilter = 3, mode = 'max', padding = 1, stride = 1)
-  print(cnn.outputSize)
-  cnn.addConvolutionalLayer(filterSize = 2, numFilter = 6, mode = 'average', padding = 1, stride = 1)
-  print(cnn.outputSize)
-  cnn.addFlattenLayer()
-  print(cnn.outputSize)
-  cnn.addDenseLayer(outputSize = 16, activation = 'relu')
-  cnn.addDenseLayer(outputSize = 4, activation = 'relu')
-  cnn.addDenseLayer(outputSize = 8, activation = 'relu')
-  print(cnn.output)
+  print(matrix[0].shape)
+  print("=====")
+  cnn = CNN()
+  cnn.addLayer(ConvolutionalLayer(inputSize=matrix[0].shape, filterSize = 2, numFilter = 3, mode = 'max', padding = 1, stride = 1))
+  print(cnn.forward(matrix[0]).shape)
+  print("=====")
+  cnn.addLayer(ConvolutionalLayer(filterSize = 2, numFilter = 6, mode = 'average', padding = 1, stride = 1))
+  print(cnn.forward(matrix[0]).shape)
+  print("=====")
+  cnn.addLayer(FlattenLayer())
+  print(cnn.forward(matrix[0]).shape)
+  print("=====")
+  cnn.addLayer(DenseLayer(numUnit = 16, activationFunctionName = 'relu'))
+  print(cnn.forward(matrix[0]).shape)
+  print("=====")
+  cnn.addLayer(DenseLayer(numUnit = 8, activationFunctionName = 'relu'))
+  print(cnn.forward(matrix[0]).shape)
+  print("=====")
+  cnn.addLayer(DenseLayer(numUnit = 4, activationFunctionName = 'relu'))
+  print(cnn.forward(matrix[0]).shape)
+  print("=====")
