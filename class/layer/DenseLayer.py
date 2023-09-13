@@ -9,18 +9,20 @@ sys.path.append(mymodule_dir)
 from activation import relu, sigmoid
 
 class DenseLayer():
-  def __init__(self, inputSize, outputSize, activation):
-    self.inputSize = inputSize
-    self.outputSize = outputSize
-    self.activation = activation
-    self.weight = np.random.randn(inputSize, outputSize)
-    self.bias = np.zeros((outputSize))
+  def __init__(self, numUnit, activationFunctionName):
+    self.numUnit = numUnit
+    self.activationFunctionName = activationFunctionName
+    self.weight = None
+    self.bias = np.zeros((numUnit,))
 
   def forward(self, inputData):
+    numFeatures = np.prod(inputData.shape)
+    if (self.weight is None) :
+      self.weight = np.random.randn(numFeatures, self.numUnit)
     output = np.dot(inputData, self.weight) + self.bias
-    if (self.activation.lower() == 'relu'):
+    if (self.activationFunctionName.lower() == 'relu'):
       output = relu(output)
-    elif (self.activation.lower() == 'sigmoid'):
+    elif (self.activationFunctionName.lower() == 'sigmoid'):
       output = sigmoid(output)
     return output
   
@@ -51,6 +53,6 @@ if __name__ == "__main__":
   print("=====")
   matrix = np.ravel(matrix[0])
   print(matrix.shape)
-  denseLayer = DenseLayer(inputSize = len(matrix), outputSize = 16, activation = 'sigmoid')
+  denseLayer = DenseLayer(numUnit = 16, activationFunctionName = 'sigmoid')
   newMatrix = denseLayer.forward(matrix)
-  print(newMatrix)
+  print(newMatrix.shape)
