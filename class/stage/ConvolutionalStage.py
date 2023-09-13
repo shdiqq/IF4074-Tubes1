@@ -9,22 +9,29 @@ sys.path.append(mymodule_dir)
 from spatialSize import spatialSize
 
 class ConvolutionalStage():
-  def __init__(self, inputSize, filterSize, numFilter, padding = 0, stride = 1):
+  def __init__(self, filterSize, numFilter, padding = 0, stride = 1, inputSize = None):
     self.inputSize = inputSize
     self.filterSize = filterSize
     self.numFilter = numFilter
     self.padding = padding
     self.stride = stride
-    self.bias = np.zeros((numFilter))
-    self.kernel = np.random.randn(self.numFilter, self.filterSize, self.filterSize, self.inputSize[2])
+    self.bias = np.zeros((numFilter,))
+    if (self.inputSize == None) :
+      self.kernel = None
+    else :
+      self.kernel = np.random.randn(self.numFilter, self.filterSize, self.filterSize, self.inputSize[2])
 
   def forward(self, inputData):
-    outputHeight, outputWidth = spatialSize(self.inputSize[0], self.inputSize[1], self.filterSize, self.padding, self.stride)
+    inputHeight, inputWidth, inputDepth = inputData.shape
+    outputHeight, outputWidth = spatialSize(inputHeight, inputWidth, self.filterSize, self.padding, self.stride)
     featureMap = np.zeros((outputHeight, outputWidth, self.numFilter))
 
+    if (self.kernel == None) :
+      self.kernel = np.random.randn(self.numFilter, self.filterSize, self.filterSize, inputDepth)
+
     for i in range(self.numFilter) :
-      for row in range(0, self.inputSize[0] - self.filterSize + 1, self.stride) :
-        for col in range(0, self.inputSize[1] - self.filterSize + 1, self.stride) :
+      for row in range(0, inputData[0] - self.filterSize + 1, self.stride) :
+        for col in range(0, inputData[1] - self.filterSize + 1, self.stride) :
           inputPatch = inputData[row : row + self.filterSize, col : col + self.filterSize, :]
           featureMap[row // self.stride, col // self.stride, i] = np.sum(inputPatch * self.kernel[i]) + self.bias[i]
 
@@ -58,3 +65,7 @@ if __name__ == "__main__":
   convolutionalStage = ConvolutionalStage(inputSize = matrix[0].shape, filterSize = 2, numFilter = 3, padding = 1, stride = 1)
   newMatrix = convolutionalStage.forward(matrix[0])
   print(newMatrix.shape) #Expect output (4,4,3)
+  print("=====")
+  convolutionalStage = ConvolutionalStage(filterSize = 3, numFilter = 4, padding = 0, stride = 1)
+  newMatrix2 = convolutionalStage.forward(newMatrix)
+  print(newMatrix2.shape) #Expect output (2,2,4)
