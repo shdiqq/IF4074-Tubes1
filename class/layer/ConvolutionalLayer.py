@@ -11,8 +11,8 @@ from DetectorStage import DetectorStage
 from PoolingStage import PoolingStage
 
 class ConvolutionalLayer():
-  def __init__(self, inputSize, filterSize, numFilter, mode, padding = 0, stride = 1):
-    self.convolutionStage = ConvolutionalStage(inputSize, filterSize, numFilter, padding, stride)
+  def __init__(self, filterSize, numFilter, mode, padding = 0, stride = 1, inputSize = None):
+    self.convolutionStage = ConvolutionalStage(filterSize, numFilter, padding, stride, inputSize)
     self.detectorStage = DetectorStage()
     self.poolingStage = PoolingStage(filterSize, stride, mode)
 
@@ -50,3 +50,7 @@ if __name__ == "__main__":
   convolutionalLayer = ConvolutionalLayer(inputSize = matrix[0].shape, filterSize = 2, numFilter = 3, mode='max', padding = 1, stride = 1)
   newMatrix = convolutionalLayer.forward(matrix[0])
   print(newMatrix.shape)
+  print("=====")
+  convolutionalLayer2 = ConvolutionalLayer(filterSize = 2, numFilter = 4, mode='max', padding = 0, stride = 1)
+  newMatrix1 = convolutionalLayer2.forward(newMatrix)
+  print(newMatrix1.shape)
