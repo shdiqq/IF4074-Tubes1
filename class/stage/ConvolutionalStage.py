@@ -16,7 +16,7 @@ class ConvolutionalStage():
     self.padding = padding
     self.stride = stride
     self.bias = np.zeros((numFilter,))
-    if (self.inputSize == None) :
+    if (self.inputSize is None) :
       self.kernel = None
     else :
       self.kernel = np.random.randn(self.numFilter, self.filterSize, self.filterSize, self.inputSize[2])
@@ -26,12 +26,12 @@ class ConvolutionalStage():
     outputHeight, outputWidth = spatialSize(inputHeight, inputWidth, self.filterSize, self.padding, self.stride)
     featureMap = np.zeros((outputHeight, outputWidth, self.numFilter))
 
-    if (self.kernel == None) :
+    if (self.kernel is None) :
       self.kernel = np.random.randn(self.numFilter, self.filterSize, self.filterSize, inputDepth)
 
     for i in range(self.numFilter) :
-      for row in range(0, inputData[0] - self.filterSize + 1, self.stride) :
-        for col in range(0, inputData[1] - self.filterSize + 1, self.stride) :
+      for row in range(0, inputData.shape[0] - self.filterSize + 1, self.stride) :
+        for col in range(0, inputData.shape[1] - self.filterSize + 1, self.stride) :
           inputPatch = inputData[row : row + self.filterSize, col : col + self.filterSize, :]
           featureMap[row // self.stride, col // self.stride, i] = np.sum(inputPatch * self.kernel[i]) + self.bias[i]
 
