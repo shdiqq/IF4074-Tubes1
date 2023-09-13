@@ -11,8 +11,8 @@ from DetectorStage import DetectorStage
 from PoolingStage import PoolingStage
 
 class ConvolutionalLayer():
-  def __init__(self, filterSize, numFilter, numDepth, mode, padding = 0, stride = 1):
-    self.convolutionStage = ConvolutionalStage(filterSize, numFilter, numDepth, padding, stride)
+  def __init__(self, inputSize, filterSize, numFilter, mode, padding = 0, stride = 1):
+    self.convolutionStage = ConvolutionalStage(inputSize, filterSize, numFilter, padding, stride)
     self.detectorStage = DetectorStage()
     self.poolingStage = PoolingStage(filterSize, stride, mode)
 
@@ -21,3 +21,32 @@ class ConvolutionalLayer():
     outputDetector = self.detectorStage.forward(featureMap)
     outputPooling = self.poolingStage.forward(outputDetector)
     return outputPooling
+  
+### TESTING ###
+if __name__ == "__main__":
+  matrix = np.array(
+    [
+      [
+        [
+          [1,11,2],
+          [1,10,4],
+          [6,12,8],
+        ],
+        [
+          [7,1,2],
+          [5,-1,2],
+          [7,-4,2],
+        ],
+        [
+          [-2,23,2],
+          [2,20,4],
+          [8,6,6],
+        ]
+      ]
+    ]
+  )
+  print(matrix[0].shape)
+  print("=====")
+  convolutionalLayer = ConvolutionalLayer(inputSize = matrix[0].shape, filterSize = 2, numFilter = 3, mode='max', padding = 1, stride = 1)
+  newMatrix = convolutionalLayer.forward(matrix[0])
+  print(newMatrix.shape)
