@@ -1,74 +1,41 @@
+from function.generateImage import *
+
 import os
 import sys
-
 script_dir = os.path.dirname(__file__)
 mymodule_dir = os.path.join(script_dir, 'class')
 sys.path.append(mymodule_dir)
 
-from function.generateImage import *
 from CNN import CNN
+from layer.ConvolutionalLayer import ConvolutionalLayer
+from layer.FlattenLayer import FlattenLayer
+from layer.DenseLayer import DenseLayer
+
+def accuracy(dataInputLabel, dataOutputLabel):
+  score = 0
+  n = len(dataInputLabel)
+  for i in range(n):
+      if (dataInputLabel[i] == dataOutputLabel[i]) :
+          score = score + 1
+  final = float(score/n)
+  return final
 
 if __name__ == "__main__":
-  objectClassDictionary = {
+  objectLabelDictionary = {
     0: 'bear',
     1: 'panda'
   }
-  dataInput, dataClassLabel = generateImage()
+  dataInput, dataInputLabel = generateImage()
 
-  # dataInput = np.array(
-  #   [
-  #     [
-  #       [
-  #         [1,11,2],
-  #         [1,10,4],
-  #         [6,12,8],
-  #       ],
-  #       [
-  #         [7,1,2],
-  #         [5,-1,2],
-  #         [7,-4,2],
-  #       ],
-  #       [
-  #         [-2,23,2],
-  #         [2,20,4],
-  #         [8,6,6],
-  #       ]
-  #     ]
-  #   ]
-  # )
-
-  print("Data yang diperoleh dari generate image")
-  print(dataInput[0].shape)
-  print("===========")
-
-  cnn = CNN(dataInput[0])
-
-  cnn.addConvolutionalLayer(filterSize = 8, numFilter = 5, mode = 'max', padding = 2, stride = 8)
-
-  print("Data yang diperoleh dari convolutional layer")
-  print(cnn.output.shape)
-  print("===========")
-
-  cnn.addConvolutionalLayer(filterSize = 8, numFilter = 15, mode = 'max', padding = 2, stride = 8)
-
-  print("Data yang diperoleh dari convolutional layer")
-  print(cnn.output.shape)
-  print("===========")
-
-  cnn.addFlattenLayer()
-
-  print("Data yang diperoleh dari flatten layer")
-  print(cnn.output.shape)
-  print("===========")
-
-  cnn.addDenseLayer(outputSize = 16, activation = 'relu')
-
-  print("Data yang diperoleh dari dense layer")
-  print(cnn.output)
-  print("===========")
-
-  cnn.addDenseLayer(outputSize = 4, activation = 'relu')
-
-  print("Data yang diperoleh dari dense layer")
-  print(cnn.output)
-  print("===========")
+  cnn = CNN()
+  cnn.addLayer(ConvolutionalLayer(inputSize=dataInput[0].shape, filterSize = 4, numFilter = 3, mode = 'max', padding = 0, stride = 4))
+  cnn.addLayer(ConvolutionalLayer(filterSize = 4, numFilter = 6, mode = 'average', padding = 0, stride = 1))
+  cnn.addLayer(FlattenLayer())
+  cnn.addLayer(DenseLayer(numUnit = 300, activationFunctionName = 'relu'))
+  cnn.addLayer(DenseLayer(numUnit = 150, activationFunctionName = 'relu'))
+  cnn.addLayer(DenseLayer(numUnit = 50, activationFunctionName = 'relu'))
+  cnn.addLayer(DenseLayer(numUnit = 25, activationFunctionName = 'relu'))
+  cnn.addLayer(DenseLayer(numUnit = 5, activationFunctionName = 'relu'))
+  cnn.addLayer(DenseLayer(numUnit = 1, activationFunctionName = 'sigmoid'))
+  dataOutputLabel = cnn.predict(dataInput)
+  print("The final accuracy score is", accuracy(dataInputLabel, dataOutputLabel))
