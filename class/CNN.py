@@ -25,9 +25,12 @@ class CNN():
     return(output)
   
   def predict(self, features):
-    out = np.array([])
+    labelOutput = []
     for i in range(len(features)):
       result = self.forward(features[i])
+      labelOutput.append(round(result[0]))
+    return(labelOutput)
+
 
 ### TESTING ###
 if __name__ == "__main__":
@@ -73,3 +76,10 @@ if __name__ == "__main__":
   cnn.addLayer(DenseLayer(numUnit = 4, activationFunctionName = 'relu'))
   print(cnn.forward(matrix[0]).shape)
   print("=====")
+  cnn.addLayer(DenseLayer(numUnit = 2, activationFunctionName = 'relu'))
+  print(cnn.forward(matrix[0]).shape)
+  print("=====")
+  cnn.addLayer(DenseLayer(numUnit = 1, activationFunctionName = 'relu'))
+  print(cnn.forward(matrix[0]).shape)
+  print("=====")
+  print(cnn.predict(matrix))
